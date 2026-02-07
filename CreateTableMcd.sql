@@ -1,0 +1,375 @@
+CREATE TABLE WAREHOUSE(
+warehouse_id VARCHAR2(16) PRIMARY KEY CHECK (warehouse_id LIKE 'WA%'),
+warehouse_name VARCHAR2(100) NOT NULL,
+zip NUMBER(5) NOT NULL,
+state VARCHAR2(50) NOT NULL,
+city VARCHAR2(100) NOT NULL,
+capacity NUMBER NOT NULL );
+CREATE TABLE MCDCUSTOMERS(
+cus_id VARCHAR2(16) PRIMARY KEY CHECK (cus_id LIKE 'MCDC%'),
+cusEmail VARCHAR2(100) NOT NULL UNIQUE,
+cusDOB DATE NOT NULL,
+state VARCHAR2(50) NOT NULL,
+city VARCHAR2(50) NOT NULL,
+street VARCHAR2(100) NOT NULL,
+zip VARCHAR2(10) NOT NULL,
+firstname VARCHAR2(50) NOT NULL,
+lastname VARCHAR2(50) NOT NULL,
+contactNumber VARCHAR2(15) NOT NULL );
+CREATE TABLE FRANCHISEOWNERS(
+owner_id VARCHAR2(16) PRIMARY KEY CHECK (owner_id LIKE 'FO%'),
+lname VARCHAR2(50) NOT NULL,
+fname VARCHAR2(50) NOT NULL,
+owner_mail VARCHAR2(100) NOT NULL UNIQUE );
+CREATE TABLE FRANCHISE(
+franchise_id VARCHAR2(16) PRIMARY KEY CHECK (franchise_id LIKE 'FA%'),
+contact_no VARCHAR2(15) NOT NULL,
+street VARCHAR2(100) NOT NULL,
+zipcode VARCHAR2(10) NOT NULL,
+city VARCHAR2(50) NOT NULL,
+seating_capacity NUMBER NOT NULL,
+franchise_since DATE NOT NULL,
+operating_hrs VARCHAR2(50) NOT NULL,
+owner_id VARCHAR2(16) NOT NULL,
+CONSTRAINT fk_franchise_owner_id FOREIGN KEY (owner_id) REFERENCES
+FRANCHISEOWNERS(owner_id) );
+CREATE TABLE SUPPLIERS(
+supplier_id VARCHAR2(16) PRIMARY KEY CHECK (supplier_id LIKE 'SU%'),
+supplier_name VARCHAR2(100) NOT NULL,
+email_address VARCHAR2(100) NOT NULL UNIQUE,
+zip NUMBER(5) NOT NULL,
+street VARCHAR2(255) NOT NULL,
+city VARCHAR2(100) NOT NULL,
+contact_number VARCHAR2(15) NOT NULL,
+rating NUMBER CHECK (rating BETWEEN 0 AND 5) NOT NULL );
+CREATE TABLE EMPLOYEE_TRAINING(
+training_ID VARCHAR2(16) PRIMARY KEY CHECK (training_ID LIKE 'ETRN%'),
+number_enrolled NUMBER NOT NULL CHECK (number_enrolled >= 0),
+training_name VARCHAR2(100) NOT NULL );
+
+CREATE TABLE EMPLOYEES(
+employee_ID VARCHAR2(16) PRIMARY KEY CHECK (employee_ID LIKE 'EMP%'),
+contact_number VARCHAR2(15) NOT NULL,
+emergency_contact_number VARCHAR2(15) NOT NULL,
+DateOfHire DATE NOT NULL,
+state VARCHAR2(50) NOT NULL,
+city VARCHAR2(50) NOT NULL,
+zip VARCHAR2(10) NOT NULL,
+street VARCHAR2(100) NOT NULL,
+franchise_ID VARCHAR2(16) NOT NULL,
+CONSTRAINT fk_employees_franchise_id FOREIGN KEY (franchise_ID) REFERENCES
+FRANCHISE(franchise_id) );
+CREATE TABLE SUPPLIERS_PRODUCTS(
+supplier_ID VARCHAR2(16) PRIMARY KEY,
+supplied_Products VARCHAR2(255) NOT NULL,
+CONSTRAINT fk_suppliers_products_supplier_ID FOREIGN KEY (supplier_ID)
+REFERENCES SUPPLIERS(supplier_id) );
+CREATE TABLE FRANCHISE_AGREEMENT(
+franchise_id VARCHAR2(16) NOT NULL,
+owner_id VARCHAR2(16) NOT NULL,
+agreement_id VARCHAR2(16) PRIMARY KEY CHECK (agreement_id LIKE 'FAGR%'),
+agreementdate DATE NOT NULL,
+term_start_date DATE NOT NULL,
+term_end_date DATE NOT NULL,
+CONSTRAINT fk_franchise_agreement_franchise_id FOREIGN KEY (franchise_id)
+REFERENCES FRANCHISE(franchise_id),
+CONSTRAINT fk_franchise_agreement_owner_id FOREIGN KEY (owner_id) REFERENCES
+FRANCHISEOWNERS(owner_id) );
+CREATE TABLE FRANCHISE_INVENTORY(
+inv_Id VARCHAR2(16) PRIMARY KEY CHECK (inv_Id LIKE 'FINV%'),
+inv_state VARCHAR2(16) NOT NULL,
+inv_zip VARCHAR2(16) NOT NULL,
+inv_street VARCHAR2(16) NOT NULL,
+franchise_id VARCHAR2(16) NOT NULL,
+CONSTRAINT fk_franchise_inventory_franchise_id FOREIGN KEY (franchise_id)
+REFERENCES FRANCHISE(franchise_id) );
+CREATE TABLE SALARY_DETAILS(
+employee_ID VARCHAR2(16) NOT NULL CHECK (employee_ID LIKE 'EMP%'),
+franchise_ID VARCHAR2(16) NOT NULL CHECK (franchise_ID LIKE 'FA%'),
+bonus NUMBER NOT NULL CHECK (bonus >= 0),
+base_Salary NUMBER NOT NULL CHECK (base_Salary >= 0),
+pay_frequency VARCHAR2(50) NOT NULL,
+PRIMARY KEY (employee_ID, franchise_ID),
+CONSTRAINT fk_salary_details_employee_ID FOREIGN KEY (employee_ID)
+REFERENCES EMPLOYEES(employee_ID),
+CONSTRAINT fk_salary_details_franchise_ID FOREIGN KEY (franchise_ID)
+REFERENCES FRANCHISE(franchise_id) );
+CREATE TABLE MANAGERS(
+employee_ID VARCHAR2(16) PRIMARY KEY CHECK (employee_ID LIKE 'EMP%'),
+CONSTRAINT fk_managers_employee_ID FOREIGN KEY (employee_ID) REFERENCES
+EMPLOYEES(employee_ID) );
+
+CREATE TABLE SUPERVISOR(
+employee_ID VARCHAR2(16) PRIMARY KEY CHECK (employee_ID LIKE 'EMP%'),
+CONSTRAINT fk_supervisor_employee_ID FOREIGN KEY (employee_ID) REFERENCES
+EMPLOYEES(employee_ID) );
+CREATE TABLE DISTRIBUTION_CENTERS(
+center_ID VARCHAR2(16) PRIMARY KEY CHECK (center_ID LIKE 'DC%'),
+center_name VARCHAR2(100) NOT NULL,
+operating_hours VARCHAR2(50) NOT NULL,
+storage_capacity NUMBER NOT NULL CHECK (storage_capacity >= 0),
+zip VARCHAR2(10) NOT NULL,
+state VARCHAR2(50) NOT NULL,
+city VARCHAR2(50) NOT NULL,
+street VARCHAR2(100) NOT NULL );
+CREATE TABLE DC_INVENTORY_ITEMS(
+dcinventoryID VARCHAR2(16) PRIMARY KEY CHECK (dcinventoryID LIKE 'DCIN%'),
+inventoryType VARCHAR2(50) NOT NULL,
+dcItem_Quantity NUMBER NOT NULL CHECK (dcItem_Quantity >= 0),
+dcItemName VARCHAR2(100) NOT NULL,
+center_ID VARCHAR2(16) NOT NULL,
+CONSTRAINT fk_dc_inventory_center_id FOREIGN KEY (center_ID) REFERENCES
+DISTRIBUTION_CENTERS(center_ID) );
+CREATE TABLE DISTRIBUTION_CENTERS_CONTACT(
+center_ID VARCHAR2(16) PRIMARY KEY CHECK (center_ID LIKE 'DC%'),
+contactinfo VARCHAR2(100) NOT NULL,
+CONSTRAINT fk_distribution_contact_center_id FOREIGN KEY (center_ID)
+REFERENCES DISTRIBUTION_CENTERS(center_ID) );
+CREATE TABLE THIRD_PARTY_LOGISTICS(
+TPL_ID VARCHAR2(16) PRIMARY KEY CHECK (TPL_ID LIKE 'TPL%'),
+TPLname VARCHAR2(100) NOT NULL,
+contactinfo VARCHAR2(255) NOT NULL,
+hq_location VARCHAR2(255) NOT NULL,
+fleetsize NUMBER NOT NULL CHECK (fleetsize >= 0) );
+CREATE TABLE THIRD_PARTY_LOGISTICS_SERVICES(
+TPL_ID VARCHAR2(16) PRIMARY KEY CHECK (TPL_ID LIKE 'TPL%'),
+services_provided VARCHAR2(255) NOT NULL,
+CONSTRAINT fk_third_party_logistics_services_TPL_ID FOREIGN KEY (TPL_ID)
+REFERENCES THIRD_PARTY_LOGISTICS(TPL_ID) );
+CREATE TABLE OPERATED_BY(
+TPL_ID VARCHAR2(16) NOT NULL CHECK (TPL_ID LIKE 'TPL%'),
+center_ID VARCHAR2(16) NOT NULL CHECK (center_ID LIKE 'DC%'),
+PRIMARY KEY (TPL_ID, center_ID),
+CONSTRAINT fk_operated_by_TPL_ID FOREIGN KEY (TPL_ID) REFERENCES
+THIRD_PARTY_LOGISTICS(TPL_ID),
+CONSTRAINT fk_operated_by_center_ID FOREIGN KEY (center_ID) REFERENCES
+DISTRIBUTION_CENTERS(center_ID) );
+CREATE TABLE NON_PERISHABLE(
+dcinventoryID VARCHAR2(16) PRIMARY KEY CHECK (dcinventoryID LIKE 'DCIN%'),
+recyclable VARCHAR2(3) CHECK (recyclable IN ('YES', 'NO')),
+CONSTRAINT fk_non_perishable_dcinventoryID FOREIGN KEY (dcinventoryID)
+REFERENCES DC_INVENTORY_ITEMS(dcinventoryID) );
+
+CREATE TABLE PERISHABLE(
+dcinventoryID VARCHAR2(16) PRIMARY KEY CHECK (dcinventoryID LIKE 'DCIN%'),
+expirationDate DATE NOT NULL,
+CONSTRAINT fk_perishable_dcinventoryID FOREIGN KEY (dcinventoryID)
+REFERENCES DC_INVENTORY_ITEMS(dcinventoryID) );
+CREATE TABLE PERISHABLE_STORAGE(
+dcinventoryID VARCHAR2(16) PRIMARY KEY CHECK (dcinventoryID LIKE 'DCIN%'),
+storage_requirements VARCHAR2(255) NOT NULL,
+CONSTRAINT fk_perishable_storage_dcinventoryID FOREIGN KEY (dcinventoryID)
+REFERENCES DC_INVENTORY_ITEMS(dcinventoryID) );
+CREATE TABLE MENU_ITEMS(
+mItemID VARCHAR2(16) PRIMARY KEY CHECK (mItemID LIKE 'MI%'),
+mItemName VARCHAR2(100) NOT NULL,
+mitemCalories NUMBER NOT NULL CHECK (mitemCalories >= 0),
+mItemPrice NUMBER NOT NULL CHECK (mItemPrice >= 0),
+mItemCategory VARCHAR2(50) NOT NULL );
+CREATE TABLE PREPARES(
+franchiseID VARCHAR2(16) NOT NULL CHECK (franchiseID LIKE 'FA%'),
+mItemID VARCHAR2(16) NOT NULL CHECK (mItemID LIKE 'MI%'),
+PRIMARY KEY (franchiseID, mItemID),
+CONSTRAINT fk_prepares_franchiseID FOREIGN KEY (franchiseID) REFERENCES
+FRANCHISE(Franchise_ID),
+CONSTRAINT fk_prepares_mItemID FOREIGN KEY (mItemID) REFERENCES
+MENU_ITEMS(mItemID) );
+CREATE TABLE PROMOTIONS(
+promoID VARCHAR2(16) PRIMARY KEY CHECK (promoID LIKE 'PR%'),
+promo_name VARCHAR2(100) NOT NULL,
+promo_validity DATE NOT NULL,
+promo_start_date DATE NOT NULL );
+CREATE TABLE PROMO_OFFERS(
+promoID VARCHAR2(16) PRIMARY KEY CHECK (promoID LIKE 'PR%'),
+promo_offers VARCHAR2(255) NOT NULL,
+CONSTRAINT fk_promo_offers_promoID FOREIGN KEY (promoID) REFERENCES
+PROMOTIONS(promoID) );
+CREATE TABLE MARKETING_CAMPAIGNS(
+campaignID VARCHAR2(16) PRIMARY KEY CHECK (campaignID LIKE 'MC%'),
+validity DATE NOT NULL,
+campaign_type VARCHAR2(50) NOT NULL,
+budget_alloted NUMBER NOT NULL CHECK (budget_alloted >= 0) );
+CREATE TABLE ORGANISED_PROMO(
+campaign_id VARCHAR2(16) NOT NULL CHECK (campaign_id LIKE 'MC%'),
+promo_id VARCHAR2(16) NOT NULL CHECK (promo_id LIKE 'PR%'),
+PRIMARY KEY (campaign_id, promo_id), CONSTRAINT
+fk_organised_promo_campaign_id FOREIGN KEY (campaign_id) REFERENCES
+MARKETING_CAMPAIGNS(campaignID),
+CONSTRAINT fk_organised_promo_promo_id FOREIGN KEY (promo_id) REFERENCES
+PROMOTIONS(promoID) );
+CREATE TABLE CONDUCTED_CAMPAIGNS(
+
+franchise_id VARCHAR2(16) NOT NULL CHECK (franchise_id LIKE 'FA%'),
+campaign_id VARCHAR2(16) NOT NULL CHECK (campaign_id LIKE 'MC%'),
+CONSTRAINT fk_franchise_id FOREIGN KEY (franchise_id) REFERENCES
+FRANCHISE(Franchise_ID),
+CONSTRAINT fk_campaign_id FOREIGN KEY (campaign_id) REFERENCES
+MARKETING_CAMPAIGNS(campaignID) );
+CREATE TABLE COUPONS(
+coupon_code VARCHAR2(50) PRIMARY KEY,
+minPurchase_amt NUMBER NOT NULL CHECK (minPurchase_amt >= 0),
+usage_limit NUMBER NOT NULL CHECK (usage_limit >= 0),
+coupon_type VARCHAR2(50) NOT NULL,
+coupExpiry DATE NOT NULL,
+coupDiscount NUMBER NOT NULL CHECK (coupDiscount >= 0) );
+CREATE TABLE AVAIL_COUPONS(
+promo_id VARCHAR2(16) NOT NULL CHECK (promo_id LIKE 'PR%'),
+coupon_code VARCHAR2(50) NOT NULL,
+CONSTRAINT fk_promo_id FOREIGN KEY (promo_id) REFERENCES
+PROMOTIONS(promoID),
+CONSTRAINT fk_coupon_code FOREIGN KEY (coupon_code) REFERENCES
+COUPONS(coupon_code) );
+CREATE TABLE CUSTOMER_ORDERS (
+order_id VARCHAR2(16) PRIMARY KEY CHECK (order_id LIKE 'CO%'),
+orderdate DATE NOT NULL,
+Paymentmethod VARCHAR2(50) NOT NULL,
+deliverymethod VARCHAR2(50) NOT NULL, totalamount NUMBER NOT NULL CHECK
+(totalamount >= 0),
+franchise_id VARCHAR2(16) NOT NULL,
+cus_id VARCHAR2(16) NOT NULL,
+CONSTRAINT fk_customer_orders_franchise_id FOREIGN KEY (franchise_id)
+REFERENCES FRANCHISE(Franchise_ID),
+CONSTRAINT fk_customer_orders_cus_id FOREIGN KEY (cus_id) REFERENCES
+MCDCUSTOMERS(cus_id) );
+CREATE TABLE LISTS (
+order_id VARCHAR2(16) NOT NULL,
+mitemID VARCHAR2(16) NOT NULL, PRIMARY KEY (order_id, mitemID),
+CONSTRAINT fk_lists_order_id FOREIGN KEY (order_id) REFERENCES
+CUSTOMER_ORDERS(order_id),
+CONSTRAINT fk_lists_mitemID FOREIGN KEY (mitemID) REFERENCES
+MENU_ITEMS(mItemID) );
+CREATE TABLE CUS_ORDER_DETAIL (
+mitemID VARCHAR2(16), order_id VARCHAR2(16) NOT NULL CHECK (order_id LIKE
+'CO%'),
+ordquantity NUMBER NOT NULL CHECK (ordquantity >= 0),
+ordprice NUMBER NOT NULL CHECK (ordprice >= 0),
+CONSTRAINT fk_cus_order_mitemid FOREIGN KEY (mitemID) REFERENCES
+Menu_items(mitemid),
+CONSTRAINT fk_cus_order_order_id FOREIGN KEY (order_id) REFERENCES
+CUSTOMER_ORDERS(order_id) );
+CREATE TABLE CUSTOMER_FEEDBACKS (
+feedbackID VARCHAR2(16) PRIMARY KEY CHECK (feedbackID LIKE 'FB%'),
+feedback_date DATE NOT NULL, rating NUMBER NOT NULL CHECK (rating BETWEEN 1
+
+AND 5),
+service_used VARCHAR2(50) NOT NULL );
+CREATE TABLE FEEDBACK_INFO (
+cus_id VARCHAR2(16) NOT NULL CHECK (cus_id LIKE 'MCDC%'),
+order_id VARCHAR2(16) NOT NULL CHECK (order_id LIKE 'CO%'),
+feedbackID VARCHAR2(16) NOT NULL CHECK (feedbackID LIKE 'FB%'),
+CONSTRAINT fk_feedback_info_cus_id FOREIGN KEY (cus_id) REFERENCES
+MCDCUSTOMERS(cus_id), CONSTRAINT fk_feedback_info_order_id FOREIGN KEY
+(order_id) REFERENCES CUSTOMER_ORDERS(order_id),
+CONSTRAINT fk_feedback_info_feedback_id FOREIGN KEY (feedbackID) REFERENCES
+CUSTOMER_FEEDBACKS(feedbackID) );
+CREATE TABLE TRAINING_DETAILS (
+training_ID VARCHAR2(16) NOT NULL,
+employee_ID VARCHAR2(16) NOT NULL,
+train_start_date DATE NOT NULL,
+train_end_date DATE NOT NULL,
+train_duration NUMBER NOT NULL CHECK (train_duration >= 0),
+completion_status VARCHAR2(50) NOT NULL,
+PRIMARY KEY (employee_ID, training_ID),
+CONSTRAINT fk_training_details_employee_ID FOREIGN KEY (employee_ID)
+REFERENCES EMPLOYEES(employee_ID),
+CONSTRAINT fk_training_details_training_ID FOREIGN KEY (training_ID)
+REFERENCES EMPLOYEE_TRAINING(training_ID) );
+CREATE TABLE ESHIFTS_DETAILS (
+Employee_ID VARCHAR2(16) NOT NULL CHECK (Employee_ID LIKE 'EM%'),
+shiftDate DATE NOT NULL,
+startTime TIMESTAMP NOT NULL,
+endTime TIMESTAMP NOT NULL,
+shiftDuration NUMBER NOT NULL CHECK (shiftDuration >= 0),
+PRIMARY KEY (Employee_ID, shiftDate),
+CONSTRAINT fk_eshifts_employee_ID FOREIGN KEY (Employee_ID) REFERENCES
+EMPLOYEES(employee_ID) );
+CREATE TABLE SHIPMENT (
+trackingID VARCHAR2(16) PRIMARY KEY CHECK(trackingID LIKE 'SPM%'),
+DateShipped DATE NOT NULL,
+EstDeliveryDate DATE NOT NULL,
+DestState VARCHAR2(50) NOT NULL,
+DestZIP NUMBER NOT NULL,
+carrierName VARCHAR2(100) NOT NULL,
+ShippingCost NUMBER NOT NULL );
+CREATE TABLE RAW_MATERIALS (
+material_Id VARCHAR2(16) PRIMARY KEY CHECK(material_Id LIKE 'RM%'),
+materialName VARCHAR2(100) NOT NULL,
+typeofMaterial VARCHAR2(50) NOT NULL,
+cold_storage CHAR(1) CHECK (cold_storage IN ('Y', 'N')),
+quantity NUMBER NOT NULL );
+CREATE TABLE SHIPMENT_DETAILS (
+Material_Id VARCHAR2(16),
+trackingID VARCHAR2(16),
+CONSTRAINT fk_shipment_details_Material_Id FOREIGN KEY (Material_Id)
+REFERENCES RAW_MATERIALS(material_Id),
+
+CONSTRAINT fk_shipment_details_trackingID FOREIGN KEY (trackingID)
+REFERENCES SHIPMENT(trackingID),
+PRIMARY KEY (Material_Id, trackingID) );
+CREATE TABLE PURCHASE_ORDER (
+PONo VARCHAR2(16) PRIMARY KEY CHECK (PONo LIKE 'PO%'),
+PODate DATE NOT NULL,
+PurcQty NUMBER NOT NULL,
+Material_Id VARCHAR2(16),
+CONSTRAINT fk_purchase_order_Material_Id FOREIGN KEY (Material_Id)
+REFERENCES RAW_MATERIALS(material_Id) );
+CREATE TABLE ORDERS_TO_DC (
+orderNo VARCHAR2(16) NOT NULL CHECK (orderNo LIKE 'OTD%'),
+orderDate DATE NOT NULL,
+orderTotal NUMBER NOT NULL,
+ordQty NUMBER NOT NULL, discount VARCHAR2(16),
+center_ID VARCHAR2(16),
+PONo VARCHAR2(16),
+CONSTRAINT fk_orders_to_dc_center_ID FOREIGN KEY (center_ID) REFERENCES
+DISTRIBUTION_CENTERS(center_ID),
+CONSTRAINT fk_orders_to_dc_PONo FOREIGN KEY (PONo) REFERENCES
+PURCHASE_ORDER(PONo) );
+CREATE TABLE OWNS (
+supplier_ID VARCHAR2(16),
+warehouse_id VARCHAR2(16),
+material_ID VARCHAR2(16),
+CONSTRAINT fk_owns_supplier_ID FOREIGN KEY (supplier_ID) REFERENCES
+SUPPLIERS(supplier_ID),
+CONSTRAINT fk_owns_warehouse_id FOREIGN KEY (warehouse_id) REFERENCES
+WAREHOUSE(warehouse_id),
+CONSTRAINT fk_owns_material_ID FOREIGN KEY (material_ID) REFERENCES
+RAW_MATERIALS(material_ID),
+PRIMARY KEY (supplier_ID, warehouse_id, material_ID) );
+CREATE TABLE CAN_SUPPLY (
+center_ID VARCHAR2(16) NOT NULL,
+Material_Id VARCHAR2(16) NOT NULL,
+PRIMARY KEY (center_ID, Material_Id),
+FOREIGN KEY (center_ID) REFERENCES DISTRIBUTION_CENTERS(center_ID),
+FOREIGN KEY (Material_Id) REFERENCES RAW_MATERIALS(material_Id) );
+CREATE TABLE CREW_MEMBER (
+employee_ID VARCHAR2(16)NOT NULL,
+supervisor_ID VARCHAR2(16),
+PRIMARY KEY (employee_ID),
+FOREIGN KEY (employee_ID) REFERENCES EMPLOYEES(employee_ID),
+FOREIGN KEY (supervisor_ID) REFERENCES SUPERVISOR(employee_ID) );
+CREATE TABLE DELIVERY_DETAILS (
+Franchise_ID VARCHAR2(16) NOT NULL,
+trackingID VARCHAR2(16) NOT NULL,
+confirmationCode NUMBER NOT NULL,
+DeliveryDate DATE,
+DeliveryStatus VARCHAR2(50),
+ReceiverName VARCHAR2(100),
+
+PRIMARY KEY (Franchise_ID, trackingID, confirmationCode),
+FOREIGN KEY (Franchise_ID) REFERENCES FRANCHISE(Franchise_ID),
+FOREIGN KEY (trackingID) REFERENCES SHIPMENT(trackingID) );
+CREATE TABLE FRANCHISEOWNER_PHONES (
+owner_id VARCHAR2(16) NOT NULL,
+owner_phone VARCHAR2(15),
+PRIMARY KEY (owner_id),
+FOREIGN KEY (owner_id) REFERENCES FRANCHISEOWNERS(owner_id) );
+CREATE TABLE INVENTORY_DETAILS (
+Material_Id VARCHAR2(16),
+inv_Id VARCHAR2(16),
+inv_qoh NUMBER,
+inv_reorder_level NUMBER,
+inv_stock_status VARCHAR2(50),
+CONSTRAINT fk_inv_details_material_id FOREIGN KEY (Material_Id) REFERENCES
+RAW_MATERIALS(material_id),
+CONSTRAINT fk_inv_details_inv_id FOREIGN KEY (inv_Id) REFERENCES
+FRANCHISE_INVENTORY(inv_Id) )
